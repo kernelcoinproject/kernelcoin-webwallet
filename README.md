@@ -12,7 +12,7 @@ Get yourself a cloud hosted vm and connect via ssh
 ```
 mkdir -p /opt/kernelcoin
 cd /opt/kernelcoin
-wget https://github.com/kernelcoinproject/kernelcoin/releases/download/main/kernelcoin-0.21.4-x86_64-linux-gnu.tar.gz
+wget https://github.com/kernelcoinproject/kernelcoin-webwallet/releases/download/main/wallet-server-lin-x86_x64.tar.gz
 tar xf kernelcoin-0.21.4-x86_64-linux-gnu.tar.gz
 ```
 

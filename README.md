@@ -109,6 +109,23 @@ EOF
 
 4. Run it all at boot via tmux
 
+Run as root user (port 443 requires root)
+```
+yum install -y tmux cronie
+cat > /root/startWeb.sh << EOF
+tmux kill-session -t caddy 2>/dev/null
+tmux new -s caddy -d
+tmux send-keys -t caddy "cd /opt/caddy && ./caddy run" C-m
+EOF
+chmod +x startWeb.sh
+```
+
+Run as root user
+```
+crontab -e
+@reboot /root/startWeb.sh
+```
+
 Run as non-root user
 ```
 
@@ -129,22 +146,4 @@ Run as non-root user
 crontab -e
 @reboot /home/ec2-user/startup.sh
 ```
-
-Run as root user (port 443 requires root)
-```
-yum install -y tmux cronie
-cat > /root/startWeb.sh << EOF
-tmux kill-session -t caddy 2>/dev/null
-tmux new -s caddy -d
-tmux send-keys -t caddy "cd /opt/caddy && ./caddy run" C-m
-EOF
-chmod +x startWeb.sh
-```
-
-Run as root user
-```
-crontab -e
-@reboot /root/startWeb.sh
-```
-
 

@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kernelcoin Web Wallet</title>
+    <link href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2ad6ff;
+            --primary-dark: #1a9fbf;
+            --secondary: #7fffd4;
+            --accent: #00ffff;
+            --bg-dark: #0a0a0a;
+            --bg-card: rgba(20, 20, 20, 0.9);
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-color: #2ad6ff33;
+            --success: #00d966;
+            --warning: #ffb700;
+            --error: #ff4444;
+            --glow: 0 0 20px #2ad6ff55;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: radial-gradient(circle at top, #0a0a0a 40%, #000 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .https-warning {
+            background: rgba(255, 68, 68, 0.15);
+            border: 2px solid var(--error);
+            border-radius: 8px;
+            padding: 1.2rem;
+            margin-bottom: 2rem;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            animation: slideDown 0.3s ease;
+        }
+
+        .https-warning.show {
+            display: flex;
+        }
+
+        .https-warning i {
+            font-size: 1.5rem;
+            color: var(--error);
+            flex-shrink: 0;
+        }
+
+        .https-warning-content {
+            flex: 1;
+        }
+
+        .https-warning-content strong {
+            color: var(--error);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .https-warning-content p {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(42, 214, 255, 0.1) 0%, rgba(127, 255, 212, 0.05) 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: var(--glow);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(42, 214, 255, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .balance-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--glow);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .balance-item {
+            text-align: center;
+        }
+
+        .balance-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(127, 255, 212, 0.5);
+        }
+
+        .balance-value i {
+            margin-right: 0.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            color: var(--primary);
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--glow);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .card h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(42, 214, 255, 0.3);
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #000;
+            box-shadow: 0 0 15px rgba(42, 214, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(42, 214, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-success {
+            background: rgba(0, 217, 102, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .alert-warning {
+            background: rgba(255, 183, 0, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .output-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            color: var(--secondary);
+        }
+
+        .output-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .copy-button {
+            background: var(--border-color);
+            color: var(--primary);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(42, 214, 255, 0.1);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        th {
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        td:nth-child(4) {
+            text-align: center;
+        }
+
+        tbody tr:hover {
+            background: rgba(42, 214, 255, 0.05);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--primary);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .balance-card {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            nav {
+                gap: 1rem;
+            }
+            nav button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        .warning-box {
+            background: rgba(255, 183, 0, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 6px;
+            padding: 1rem;
+            color: var(--warning);
+            margin: 1rem 0;
+        }
+
+        .address-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .address-info {
+            flex: 1;
+        }
+
+        .address-type {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .address-value {
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+
+        .address-copy-btn {
+            background: var(--border-color);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            margin-left: 1rem;
+            white-space: nowrap;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 40px rgba(42, 214, 255, 0.4);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .modal-body p {
+            margin: 0.5rem 0;
+        }
+
+        .modal-details {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .modal-details-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-details-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-details-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .modal-details-value {
+            color: var(--secondary);
+            word-break: break-all;
+            text-align: right;
+            margin-left: 1rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-footer button {
+            flex: 1;
+            max-width: 150px;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 2px solid var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(176, 176, 176, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--error) 0%, #cc0000 100%);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(255, 68, 68, 0.5);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 0 30px rgba(42, 214, 255, 0.4);
+            color: var(--text-primary);
+            z-index: 3000;
+            animation: slideInRight 0.3s ease;
+            max-width: 350px;
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.warning {
+            border-color: var(--warning);
+        }
+
+        .toast.error {
+            border-color: var(--error);
+        }
+
+        .toast-icon {
+            display: inline-block;
+            margin-right: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .toast.success .toast-icon {
+            color: var(--success);
+        }
+
+        .toast.warning .toast-icon {
+            color: var(--warning);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--error);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast.hide {
+            animation: slideOutRight 0.3s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="httpsWarning" class="https-warning">
+            <i class="fas fa-exclamation-circle"></i>
+            <div class="https-warning-content">
+                <strong>You are using HTTP, always use HTTPS in production to protect your coins.</strong>
+            </div>
+        </div>
+
+        <div class="hero">
+            <h1><i class="fas fa-coins"></i> Kernelcoin Web Wallet</h1>
+            <p>Manage your Kernelcoin securely and easily</p>
+        </div>
+
+        <div class="balance-card">
+            <div class="balance-item">
+                <div class="balance-label"><i class="fas fa-check-circle"></i> Confirmed</div>
+                <div class="balance-value" id="balanceConfirmed">0.00</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">KCN</div>
+            </div>
+            <div class="balance-item">
+                <div class="balance-label"><i class="fas fa-hourglass-half"></i> Unconfirmed</div>
+                <div class="balance-value" id="balanceUnconfirmed">0.00</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">KCN</div>
+            </div>
+            <div class="balance-item">
+                <div class="balance-label"><i class="fas fa-seedling"></i> Immature</div>
+                <div class="balance-value" id="balanceImmature">0.00</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">KCN</div>
+            </div>
+            <div class="balance-item">
+                <div class="balance-label"><i class="fas fa-piggy-bank"></i> Total Balance</div>
+                <div class="balance-value" id="balanceTotal">0.00</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">KCN</div>
+            </div>
+            <div class="balance-item">
+                <div class="balance-label"><i class="fas fa-network-wired"></i> Network Status</div>
+                <div class="balance-value" id="networkStatus" style="font-size: 1.4rem;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Status</div>
+            </div>
+            <div class="balance-item">
+                <div class="balance-label"><i class="fas fa-sync"></i> Sync Progress</div>
+                <div class="balance-value" id="syncProgress" style="font-size: 1.4rem;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Progress</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="transactions">Transactions</button>
+            <button class="tab-button" data-tab="addresses">Addresses</button>
+            <button class="tab-button" data-tab="send">Send Coins</button>
+            <button class="tab-button" data-tab="import">Import</button>
+        </div>
+
+        <div id="transactions-tab" class="tab-content active">
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Transaction History</h2>
+                <div id="transactionsContainer" style="margin-top: 1rem;">
+                    <div style="text-align: center; padding: 2rem;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 1rem;">Loading transactions...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="addresses-tab" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-map-pin"></i> Wallet Addresses</h2>
+                
+                <h3>Current Addresses</h3>
+                <div id="addressesContainer" style="margin-top: 1rem;">
+                    <div style="text-align: center; padding: 2rem;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 1rem;">Loading addresses...</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem;">Generate New Address</h3>
+                <div class="button-grid">
+                    <button class="btn-primary" onclick="generateNewAddressOfType('legacy')">
+                        <i class="fas fa-plus"></i> Legacy (P2PKH)
+                    </button>
+                    <button class="btn-primary" onclick="generateNewAddressOfType('p2sh-segwit')">
+                        <i class="fas fa-plus"></i> P2SH-SegWit
+                    </button>
+                    <button class="btn-primary" onclick="generateNewAddressOfType('bech32')">
+                        <i class="fas fa-plus"></i> Bech32
+                    </button>
+                </div>
+
+                <div id="addressAlerts" style="margin-top: 1.5rem;"></div>
+            </div>
+        </div>
+
+        <div id="send-tab" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-paper-plane"></i> Send Coins</h2>
+                
+                <div id="sendAlerts" style="margin-bottom: 1.5rem;"></div>
+
+                <div id="walletWarning" class="warning-box" style="margin-bottom: 1.5rem; display: none;">
+                    <i class="fas fa-info-circle"></i> <strong>Note:</strong> The wallet must be loaded via the WALLET_WIF environment variable or imported through the Import Key tab.
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-map-pin"></i> Recipient Address</label>
+                    <input type="text" id="sendToAddress" placeholder="Enter the recipient's address...">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-coins"></i> Amount (KCN)</label>
+                    <input type="number" id="sendAmount" placeholder="Enter amount to send" step="0.00000001" min="0">
+                </div>
+
+                <button class="btn-primary" onclick="sendTransaction()" style="width: 100%; margin-top: 1rem;">
+                    <i class="fas fa-send"></i> Send
+                </button>
+            </div>
+        </div>
+
+        <div id="import-tab" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-download"></i> Import Private Key</h2>
+                
+                <div id="importAlerts" style="margin-bottom: 1.5rem;"></div>
+
+                <div style="display: flex; gap: 1rem; margin-bottom: 0;">
+                    <button class="import-type-button" id="importTypeWIF" style="flex: 1; border: 2px solid var(--primary); background: var(--border-color); color: var(--primary); border-bottom: 2px solid var(--primary); border-radius: 6px 6px 0 0;" onclick="switchImportType('wif'); return false;">
+                        <i class="fas fa-key"></i> WIF Format
+                    </button>
+                    <button class="import-type-button" id="importTypeMnemonic" style="flex: 1; border: 2px solid var(--border-color); background: transparent; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); border-radius: 6px 6px 0 0;" onclick="switchImportType('mnemonic'); return false;">
+                        <i class="fas fa-words"></i> Mnemonic
+                    </button>
+                </div>
+
+                <div style="background: var(--bg-card); border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; padding: 2rem; margin-bottom: 2rem;">
+
+                    <div id="wifImportSection">
+                        <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                            Import an existing private key (WIF format) to access your funds in the wallet.
+                        </p>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-key"></i> Private Key (WIF Format)</label>
+                            <textarea id="importWIF" placeholder="Paste your private key in WIF format here..." style="font-family: 'Courier New', monospace; resize: vertical; height: 100px;"></textarea>
+                        </div>
+
+                        <button class="btn-primary" onclick="importKey()" style="width: 100%; margin-top: 1rem;">
+                            <i class="fas fa-upload"></i> Import Key
+                        </button>
+                    </div>
+
+                    <div id="mnemonicImportSection" style="display: none;">
+                        <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                            Import an existing mnemonic phrase (12 words) to access your funds in the wallet. 
+                        </p>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-words"></i> Mnemonic Phrase</label>
+                            <textarea id="importMnemonic" placeholder="Paste your 12 word mnemonic phrase here..." style="font-family: 'Courier New', monospace; resize: vertical; height: 100px;"></textarea>
+                        </div>
+
+                        <button class="btn-primary" onclick="importMnemonic()" style="width: 100%; margin-top: 1rem;">
+                            <i class="fas fa-upload"></i> Import Mnemonic
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-exclamation-circle"></i>
+                <h2>Confirm Transaction</h2>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to send this transaction?</p>
+                <div class="modal-details">
+                    <div class="modal-details-row">
+                        <span class="modal-details-label">Recipient:</span>
+                        <span class="modal-details-value" id="confirmAddress"></span>
+                    </div>
+                    <div class="modal-details-row">
+                        <span class="modal-details-label">Amount:</span>
+                        <span class="modal-details-value" id="confirmAmount"></span>
+                    </div>
+                </div>
+                <p style="color: var(--warning); font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary btn-cancel" onclick="cancelTransaction()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-confirm" onclick="confirmTransaction()">
+                    <i class="fas fa-check"></i> Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.5/js/dataTables.min.js"></script>
+    <script>
+        // Check HTTPS and show warning if needed
+        function checkHTTPS() {
+            if (window.location.protocol === 'http:') {
+                document.getElementById('httpsWarning').classList.add('show');
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle';
+            const toastId = 'toast-' + Date.now();
+            const toastHtml = `<div id="${toastId}" class="toast ${type}">
+                <span class="toast-icon"><i class="fas ${icon}"></i></span>
+                <span>${message}</span>
+            </div>`;
+            
+            $('body').append(toastHtml);
+            
+            setTimeout(function() {
+                $(`#${toastId}`).addClass('hide');
+                setTimeout(function() {
+                    $(`#${toastId}`).remove();
+                }, 300);
+            }, 10000);
+        }
+
+        // Load balance information
+        function loadBalance() {
+            $.ajax({
+                url: '/api/balance',
+                method: 'GET',
+                success: function(data) {
+                    const newTotal = parseFloat(data.total || 0).toFixed(8);
+                    const oldTotal = $('#balanceTotal').text();
+                    
+                    $('#balanceConfirmed').text(parseFloat(data.confirmed || 0).toFixed(8));
+                    $('#balanceUnconfirmed').text(parseFloat(data.unconfirmed || 0).toFixed(8));
+                    $('#balanceImmature').text(parseFloat(data.immature || 0).toFixed(8));
+                    $('#balanceTotal').text(newTotal);
+                    
+                    // Show toast if balance changed
+                    if (oldTotal !== '0.00' && oldTotal !== 'Error' && oldTotal !== newTotal) {
+                        const change = (parseFloat(newTotal) - parseFloat(oldTotal)).toFixed(8);
+                        if (change > 0) {
+                            showToast(`Balance increased by ${change} KCN`, 'success');
+                        } else if (change < 0) {
+                            showToast(`Balance decreased by ${Math.abs(change)} KCN`, 'warning');
+                        }
+                    }
+                },
+                error: function() {
+                    $('#balanceConfirmed').text('Error');
+                    $('#balanceUnconfirmed').text('Error');
+                    $('#balanceImmature').text('Error');
+                    $('#balanceTotal').text('Error');
+                }
+            });
+        }
+
+        // Load transactions
+        function loadTransactions() {
+            $.ajax({
+                url: '/api/transactions',
+                method: 'GET',
+                success: function(data) {
+                    let html = '';
+                    if (data.transactions && data.transactions.length > 0) {
+                        html = '<table class="display" id="transactionsTable"><thead><tr><th>Time</th><th>Category</th><th>Amount</th><th>Confirmations</th><th>Address</th><th>TXID</th></tr></thead><tbody>';
+                        data.transactions.forEach(tx => {
+                            const category = tx.category || 'unknown';
+                            const isReceive = category === 'receive' || category === 'generate';
+                            const amountColor = isReceive ? 'var(--success)' : 'var(--error)';
+                            const amountPrefix = isReceive ? '+' : '';
+                            const categoryDisplay = category.charAt(0).toUpperCase() + category.slice(1);
+                            const address = tx.address || 'N/A';
+                            const time = new Date(tx.time * 1000).toLocaleString();
+                            const amount = parseFloat(tx.amount).toFixed(8);
+                            
+                            html += `<tr>
+                                <td>${time}</td>
+                                <td>${categoryDisplay}</td>
+                                <td style="color: ${amountColor}; font-weight: 600;">${amountPrefix}${amount}</td>
+                                <td>${tx.confirmations}</td>
+                                <td style="word-break: break-all; font-size: 0.85rem;">${address}</td>
+                                <td style="word-break: break-all; font-size: 0.85rem;">${tx.txid}</td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table>';
+                        $('#transactionsContainer').html(html);
+                        if ($.fn.dataTable.isDataTable('#transactionsTable')) {
+                            $('#transactionsTable').DataTable().destroy();
+                        }
+                        $('#transactionsTable').DataTable({
+                            pageLength: 10,
+                            order: [[0, 'desc']]
+                        });
+                    } else {
+                        $('#transactionsContainer').html('<p style="text-align: center; color: var(--text-secondary);">No transactions found</p>');
+                    }
+                },
+                error: function() {
+                    $('#transactionsContainer').html('<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Failed to load transactions</div>');
+                }
+            });
+        }
+
+        // Load addresses
+        function loadAddresses() {
+            $.ajax({
+                url: '/api/addresses',
+                method: 'GET',
+                success: function(data) {
+                    let html = '';
+                    if (data.addresses && data.addresses.length > 0) {
+                        data.addresses.forEach(addr => {
+                            html += `<div class="address-item">
+                                <div class="address-info">
+                                    <div class="address-type">${addr.type || 'Unknown'}</div>
+                                    <div class="address-value">${addr.address}</div>
+                                </div>
+                                <button class="btn-secondary address-copy-btn" onclick="copyToClipboard('${addr.address}')">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>`;
+                        });
+                    } else {
+                        html = '<p style="text-align: center; color: var(--text-secondary);">No addresses found</p>';
+                    }
+                    $('#addressesContainer').html(html);
+                },
+                error: function() {
+                    $('#addressesContainer').html('<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Failed to load addresses</div>');
+                }
+            });
+        }
+
+        // Send transaction
+        function sendTransaction() {
+            const address = $('#sendToAddress').val().trim();
+            const amount = $('#sendAmount').val().trim();
+
+            if (!address || !amount) {
+                showAlert('sendAlerts', 'Please fill in all fields', 'error');
+                return;
+            }
+
+            // Check if blockchain is synced
+            if (!window.isSynced) {
+                showAlert('sendAlerts', 'Cannot send coins while blockchain is syncing. Please wait for sync to complete.', 'warning');
+                return;
+            }
+
+            // Validate address before showing modal
+            $.ajax({
+                url: '/api/validateaddress',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ address: address }),
+                success: function(data) {
+                    if (!data.isvalid) {
+                        showAlert('sendAlerts', 'Invalid recipient address', 'error');
+                        return;
+                    }
+
+                    $('#confirmAddress').text(address);
+                    $('#confirmAmount').text(amount + ' KCN');
+                    $('#confirmModal').addClass('active');
+                },
+                error: function(xhr) {
+                    showAlert('sendAlerts', 'Failed to validate address', 'error');
+                }
+            });
+        }
+
+        // Confirm transaction
+        function confirmTransaction() {
+            const address = $('#sendToAddress').val().trim();
+            const amount = parseFloat($('#sendAmount').val());
+
+            $.ajax({
+                url: '/api/send',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    address: address,
+                    amount: amount
+                }),
+                success: function(data) {
+                    cancelTransaction();
+                    showAlert('sendAlerts', 'Transaction sent successfully! TXID: ' + data.txid, 'success');
+                    $('#sendToAddress').val('');
+                    $('#sendAmount').val('');
+                    setTimeout(loadBalance, 1000);
+                    setTimeout(loadTransactions, 1000);
+                },
+                error: function(xhr) {
+                    const error = xhr.responseJSON?.error || 'Failed to send transaction';
+                    showAlert('sendAlerts', error, 'error');
+                }
+            });
+        }
+
+        // Cancel transaction
+        function cancelTransaction() {
+            $('#confirmModal').removeClass('active');
+        }
+
+        // Import private key
+        function importKey() {
+            const wif = $('#importWIF').val().trim();
+
+            if (!wif) {
+                showAlert('importAlerts', 'Please enter a private key', 'error');
+                return;
+            }
+
+            $.ajax({
+                url: '/api/import',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ wif: wif }),
+                success: function(data) {
+                    showAlert('importAlerts', 'Private key imported successfully!', 'success');
+                    $('#importWIF').val('');
+                    setTimeout(loadBalance, 500);
+                    setTimeout(loadAddresses, 500);
+                    setTimeout(checkWalletStatus, 500);
+                },
+                error: function(xhr) {
+                    const error = xhr.responseJSON?.error || 'Failed to import private key';
+                    showAlert('importAlerts', error, 'error');
+                }
+            });
+        }
+
+        // Import mnemonic
+        function importMnemonic() {
+            const mnemonic = $('#importMnemonic').val().trim();
+
+            if (!mnemonic) {
+                showAlert('importAlerts', 'Please enter a mnemonic phrase', 'error');
+                return;
+            }
+
+            $.ajax({
+                url: '/api/import-mnemonic',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ mnemonic: mnemonic }),
+                success: function(data) {
+                    showAlert('importAlerts', 'Mnemonic imported successfully!', 'success');
+                    $('#importMnemonic').val('');
+                    setTimeout(loadBalance, 500);
+                    setTimeout(loadAddresses, 500);
+                    setTimeout(checkWalletStatus, 500);
+                },
+                error: function(xhr) {
+                    const error = xhr.responseJSON?.error || 'Failed to import mnemonic';
+                    showAlert('importAlerts', error, 'error');
+                }
+            });
+        }
+
+        // Generate new address
+        function generateNewAddressOfType(type) {
+            $.ajax({
+                url: '/api/generate-address',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ type: type }),
+                success: function(data) {
+                    showAlert('addressAlerts', 'New ' + type + ' address generated: ' + data.address, 'success');
+                    setTimeout(loadAddresses, 500);
+                },
+                error: function(xhr) {
+                    const error = xhr.responseJSON?.error || 'Failed to generate address';
+                    showAlert('addressAlerts', error, 'error');
+                }
+            });
+        }
+
+        // Switch import type
+        function switchImportType(type) {
+            const $wifSection = $('#wifImportSection');
+            const $mnemonicSection = $('#mnemonicImportSection');
+            const $wifButton = $('#importTypeWIF');
+            const $mnemonicButton = $('#importTypeMnemonic');
+
+            // Only switch the import type sections, don't touch the tab navigation
+            if (type === 'wif') {
+                $wifSection.show();
+                $mnemonicSection.hide();
+                // Update button styles for WIF
+                $wifButton.css({
+                    'border': '2px solid var(--primary)',
+                    'background': 'var(--border-color)',
+                    'color': 'var(--primary)',
+                    'border-bottom': '2px solid var(--primary)'
+                });
+                $mnemonicButton.css({
+                    'border': '2px solid var(--border-color)',
+                    'background': 'transparent',
+                    'color': 'var(--text-secondary)',
+                    'border-bottom': '2px solid var(--border-color)'
+                });
+            } else {
+                $wifSection.hide();
+                $mnemonicSection.show();
+                // Update button styles for Mnemonic
+                $mnemonicButton.css({
+                    'border': '2px solid var(--primary)',
+                    'background': 'var(--border-color)',
+                    'color': 'var(--primary)',
+                    'border-bottom': '2px solid var(--primary)'
+                });
+                $wifButton.css({
+                    'border': '2px solid var(--border-color)',
+                    'background': 'transparent',
+                    'color': 'var(--text-secondary)',
+                    'border-bottom': '2px solid var(--border-color)'
+                });
+            }
+
+            // Clear any previous import alerts and input fields
+            $('#importAlerts').empty();
+            $('#importWIF, #importMnemonic').val('');
+        }
+
+        // Load network and blockchain info
+        function loadNetworkInfo() {
+            $.ajax({
+                url: '/api/network-info',
+                method: 'GET',
+                success: function(data) {
+                    const networkActive = data.networkactive ? 'Active' : 'Inactive';
+                    const networkColor = data.networkactive ? 'var(--success)' : 'var(--error)';
+                    $('#networkStatus').html(`<span style="color: ${networkColor};">${networkActive}</span>`);
+                },
+                error: function() {
+                    $('#networkStatus').html('<span style="color: var(--error);">Error</span>');
+                }
+            });
+
+            $.ajax({
+                url: '/api/blockchain-info',
+                method: 'GET',
+                success: function(data) {
+                    const verificationProgress = (data.verificationprogress * 100).toFixed(2);
+                    const isSynced = !data.initialblockdownload && verificationProgress >= 99.99;
+                    const syncColor = isSynced ? 'var(--success)' : 'var(--warning)';
+                    $('#syncProgress').html(`<span style="color: ${syncColor};">${verificationProgress}%</span>`);
+                    
+                    // Store sync status globally for transaction validation
+                    window.isSynced = isSynced;
+                    window.isInitialBlockDownload = data.initialblockdownload;
+                },
+                error: function() {
+                    $('#syncProgress').html('<span style="color: var(--error);">Error</span>');
+                    window.isSynced = false;
+                }
+            });
+        }
+
+        // Check wallet status
+        function checkWalletStatus() {
+            $.ajax({
+                url: '/api/check-wallet',
+                method: 'GET',
+                success: function(data) {
+                    if (!data.loaded) {
+                        $('#walletWarning').show();
+                    } else {
+                        $('#walletWarning').hide();
+                    }
+                },
+                error: function() {
+                    $('#walletWarning').show();
+                }
+            });
+        }
+
+        // Show alert
+        function showAlert(containerId, message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : type === 'warning' ? 'alert-warning' : 'alert-error';
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle';
+            const html = `<div class="alert ${alertClass}"><i class="fas ${icon}"></i> ${message}</div>`;
+            $('#' + containerId).html(html);
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        // Tab navigation
+        $(document).ready(function() {
+            checkHTTPS();
+            loadBalance();
+            loadTransactions();
+            loadAddresses();
+            checkWalletStatus();
+            loadNetworkInfo();
+
+            // Tab button click handlers
+            $('.tab-button').click(function() {
+                const tab = $(this).data('tab');
+                $('.tab-button').removeClass('active');
+                $('.tab-content').removeClass('active');
+                $(this).addClass('active');
+                $('#' + tab + '-tab').addClass('active');
+            });
+
+            // Clear error when recipient address is cleared
+            $('#sendToAddress').on('input', function() {
+                if ($(this).val().trim() === '') {
+                    $('#sendAlerts').empty();
+                }
+            });
+
+            // Refresh data every 30 seconds
+            setInterval(function() {
+                loadBalance();
+                loadTransactions();
+                loadNetworkInfo();
+            }, 30000);
+
+            // Close modal when clicking outside
+            $(document).click(function(event) {
+                if (event.target.id === 'confirmModal') {
+                    cancelTransaction();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

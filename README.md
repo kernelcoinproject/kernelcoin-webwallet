@@ -2,6 +2,7 @@
 Not everyone wants to carry around a laptop to send coins
 
 ## Screenshots
+<img width="1229" height="972" alt="Screenshot 2025-11-18 at 3 03 12 AM" src="https://github.com/user-attachments/assets/384819c1-9086-4479-812e-a7b0b0ba651b" />
 
 ## Basic Setup
 

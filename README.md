@@ -133,7 +133,6 @@ cat > /home/ec2-user/startup.sh << EOF
 tmux kill-session -t wallet 2>/dev/null
 tmux new -s wallet -d
 tmux neww -t wallet -n kernelcoin
-tmux neww -t wallet -n caddy
 tmux neww -t wallet -n webwallet
 tmux send-keys -t wallet:kernelcoin "cd /home/ec2-user/kernelcoin && ./kernelcoind" C-m
 tmux send-keys -t wallet:webwallet "cd /home/ec2-user/kernelcoin-webwallet && ./start.sh" C-m

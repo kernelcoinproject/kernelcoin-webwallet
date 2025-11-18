@@ -7,11 +7,13 @@ Not everyone wants to carry around a laptop to send coins
 
 Get yourself a cloud hosted vm and connect via ssh
 
+As non root user
+
 1. Setup kernelcoind
 
 ```
-mkdir -p /opt/kernelcoin
-cd /opt/kernelcoin
+mkdir -p kernelcoin
+cd kernelcoin
 wget https://github.com/kernelcoinproject/kernelcoin/releases/download/main/kernelcoin-0.21.4-x86_64-linux-gnu.tar.gz
 tar xf kernelcoin-0.21.4-x86_64-linux-gnu.tar.gz
 ```
@@ -42,17 +44,17 @@ EOF
 2. Download and run the web wallet binary
 
 ```
-mkdir -p /opt/kernelcoin-webwallet
-cd /opt/kernelcoin-webwallet
+mkdir -p kernelcoin-webwallet
+cd kernelcoin-webwallet
 wget https://github.com/kernelcoinproject/kernelcoin-webwallet/releases/download/main/wallet-server-lin-x86_x64.tar.gz
 tar xf wallet-server-lin-x86_x64.tar.gz
-cat > /opt/kernelcoin-webwallet/start.sh << EOF
+cat > start.sh << EOF
 export RPC_URL="http://127.0.0.1:9332"
 export RPC_USER="mike"
 export RPC_PASS="x"
 export LISTEN_ADDR="127.0.0.1:8080"
 #export WALLET_WIF="..."
-/opt/kernelcoin-wallet/wallet-server-lin-x86_x64
+./wallet-server-lin-x86_x64
 EOF
 chmod +x start.sh
 ./start.sh
@@ -115,9 +117,8 @@ tmux new -s wallet -d
 tmux neww -t wallet -n kernelcoin
 tmux neww -t wallet -n caddy
 tmux neww -t wallet -n webwallet
-tmux send-keys -t wallet:kernelcoin "cd /opt/kernelcoin && ./kernelcoind" C-m
-tmux send-keys -t wallet:caddy "cd /opt/caddy && ./caddy --config /opt/caddy/Caddyfile" C-m
-tmux send-keys -t wallet:webwallet "cd /opt/kernelcoin-webwallet && ./start.sh" C-m
+tmux send-keys -t wallet:kernelcoin "cd /home/ec2-user/kernelcoin && ./kernelcoind" C-m
+tmux send-keys -t wallet:webwallet "cd /home/ec2-user/kernelcoin-webwallet && ./start.sh" C-m
 EOF
 chmod +x startup.sh.
 ```
@@ -131,7 +132,7 @@ crontab -e
 Run as root user (port 443 requires root)
 ```
 yum install -y tmux cronie
-cat > startWeb.sh << EOF
+cat > /root/startWeb.sh << EOF
 tmux kill-session -t caddy 2>/dev/null
 tmux new -s caddy -d
 tmux send-keys -t caddy "cd /opt/caddy && ./caddy --config /opt/caddy/Caddyfile" C-m

@@ -44,6 +44,7 @@ EOF
 2. Download and run the web wallet binary
 
 ```
+cd ~
 mkdir -p kernelcoin-webwallet
 cd kernelcoin-webwallet
 wget https://github.com/kernelcoinproject/kernelcoin-webwallet/releases/download/main/wallet-server-lin-x86_x64.tar.gz

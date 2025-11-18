@@ -15,7 +15,7 @@ package() {
 
     GOOS=$GOOS GOARCH=$GOARCH go build -o "$BIN" main.go rpc_client.go wallet.go
 
-    tar -czf "release/$BIN.tar.gz" "$BIN" index.html
+    tar --no-xattrs --disable-copyfile -czf "release/$BIN.tar.gz" "$BIN" index.html
 }
 
 package linux   amd64 ""     lin-x86_x64

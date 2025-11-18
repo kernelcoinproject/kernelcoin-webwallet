@@ -80,7 +80,7 @@ CADDYPASS=$(/opt/caddy/caddy hash-password -p "REPLACEPASSWORD")
 cat > /opt/caddy/Caddyfile << EOF
 $DOMAIN {
 
-    basicauth {
+    basic_auth {
         admin $CADDYPASS
     }
 
@@ -104,7 +104,7 @@ $DOMAIN {
     reverse_proxy 127.0.0.1:8080
 }
 EOF
-/opt/caddy/caddy --config /opt/caddy/Caddyfile
+/opt/caddy/caddy run
 ```
 
 4. Run it all at boot via tmux
@@ -136,7 +136,7 @@ yum install -y tmux cronie
 cat > /root/startWeb.sh << EOF
 tmux kill-session -t caddy 2>/dev/null
 tmux new -s caddy -d
-tmux send-keys -t caddy "cd /opt/caddy && ./caddy --config /opt/caddy/Caddyfile" C-m
+tmux send-keys -t caddy "cd /opt/caddy && ./caddy run" C-m
 EOF
 chmod +x startWeb.sh
 ```

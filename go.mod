@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/btcsuite/btcd v0.24.0
 	github.com/btcsuite/btcd/btcutil v1.1.5
-	github.com/tyler-smith/go-bip39 v1.1.0
+	github.com/luxfi/go-bip39 v1.1.0
 )
 
 require (
